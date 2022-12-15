@@ -1,0 +1,184 @@
+#include <iostream>
+#include <algorithm>
+#include <iomanip>
+#include <cstdlib>
+#include <time.h>
+#include <fstream>
+using namespace std;
+
+void spw(int size, int *tab)//sortowanie przez wstawianie
+{
+     int pom, j;
+     for(int i=1; i<size; i++)
+     {
+             //wstawienie elementu w odpowiednie miejsce
+             pom = tab[i]; //ten element będzie wstawiony w odpowiednie miejsce
+             j = i-1;
+             
+             //przesuwanie elementów większych od pom
+             while(j>=0 && tab[j]>pom) 
+             {
+                        tab[j+1] = tab[j]; //przesuwanie elementów
+                        --j;
+             }
+             tab[j+1] = pom; //wstawienie pom w odpowiednie miejsce
+     }     
+}
+void grz(int size ,int *tab )
+{
+    int gap = size;//przypisywanie rozpiętości tablicy
+    bool replace = true;//zmienna logiczna od zmiany elementów
+   
+    while( gap > 1 || replace )//warunek do posortowania całości tablicy
+    {
+        gap = gap * 10 / 13;//dzielenie rozpiętości przez 1.3, odrzuca automatycznie część ułamkową
+        if( gap == 0 )///gdy gap osiagnie wartosc po odrzucenu czesci ułamkowej równej 0 zmienia ja na 1, ostatnia petla programu
+             gap = 1;
+       
+        replace = false;//zmiana warunku logicznego, nie wykonano zamiany elementów
+        for( int i = 0; i + gap < size; i++ )//zmiana elemetów w tablicy dla danej rozpiętości
+        {
+            if( tab[ i + gap ] < tab[ i ] )
+            {
+                swap( tab[ i ], tab[ i + gap ] );//zamiana miejscami elementów w tablicy
+                replace = true;//zmiana warunku logicznego, zamiana nastąpiła
+            }
+        }
+    }
+}
+
+
+int main() {
+   	int x = 0;
+    while(x>3 || x<1)//menu programu
+    {
+    cout<<"*******************MENU********************"<<endl;
+    cout<<"1.wgenerowanie tablicy o wielkosci podanej przez uzytkownika w zakresie od 0 do 99."<<endl;
+    cout<<"2.wprowadzenie tablicy za pomoca pliku."<<endl;
+    cout<<"3.Wyjscie z programu."<<endl;
+    cout<<"Wybieram : ";
+    cin>>x;
+    system("cls");//czyszczenie ekranu
+    }
+	clock_t start1,start2,stop1, stop2;//zmienna zapisujaca 
+	double czas1,czas2;//zmienne zapisujae czasy
+    switch(x)
+    {
+    	case 1:
+    		{
+    			int n, *tab1, *tab2;
+    			cout<<"podaj n: ";
+    			cin>>n;
+    			tab1 = new int [n];
+    			tab2 = new int [n];
+    			srand ( ( unsigned )time ( NULL ) );//generowanie liczb losowych od 0 do 99
+  				for(int i = 0; i <n; i++ )
+				{
+					tab1[i] = rand( ) % 100;
+				}
+    			cout<<"Elementy przed sortowaniem:"<<endl;//wypisanie elemetów tablicy przed sortowaniem
+    			ofstream zbior("zbior.txt");//otworzenie pliku do ktorego zapisana zostanie nieposortowana tablica
+    			for(int i=0; i<n; i++)//zapis do pliku/ wypisanie na ekranie elementow nieposortowaniej tablicy
+    			{
+            		cout<<tab1[i]<<" ";
+            		zbior<<tab1[i]<<" ";
+	    		}
+	    		zbior.close();
+				for(int i=0;i<n;i++)
+				{
+					tab2[i]=tab1[i];
+				}
+				
+				 start1 = clock();//czas liczenia    	
+   				 spw(n, tab1);//wywpołanie sortowania przez wstawianie
+   				 stop1 = clock();
+    			 czas1 = (double)(stop1 - start1)/CLOCKS_PER_SEC;
+   				 start2 = clock();//czas liczenia
+				 grz(n,tab2);//wypisanie sortowania grzebieniowego
+   				 stop2 = clock();
+    			 czas2 = (double)(stop2 - start1)/CLOCKS_PER_SEC;
+    			
+    			    	
+   				 
+				ofstream wynik("wynik.txt");
+				wynik<<"elementy po sortowaniu:"<<endl;
+				wynik.close();
+    			cout<<"\nElementy po sortowaniu:"<<endl;
+    			for(int i=0; i<n; i++)//zapis wyniku do pliku oraz wypisanie go na ekranie
+    			{
+				
+    				wynik.open("wynik.txt",ios_base::app);
+					wynik<<tab2[i]<<" ";
+					wynik.close();
+            		cout<<tab2[i]<<" ";
+            	} 
+            	
+            	cout<<"czas wykonywania sorotowania przez wstawianie wynosi: "<<czas1<<endl;//wypisanie czasów każdego z sortowania
+            	cout<<"czas wykonywania sorotowania grzebieniowego wynosi: "<<czas1<<endl;
+   	 			cin.ignore();
+    			cin.get();
+    			break;
+			}
+		case 2:
+			{
+				int n, *tab1, *tab2;
+    			cout<<"podaj n: ";
+    			cin>>n;
+    			tab1 = new int [n];
+    			tab2 = new int [n];
+    			ifstream dp("dp.txt");//deklaracja pliku w ktorym zawarty jest ciag do posortowania
+    			if (!dp)//reakcja na bład w czytywaniu
+    			{
+        			cout << "Nie mozna otworzyc pliku";
+        			getchar();
+        			return 1;
+    			}
+    			while (!dp.eof())//po popranym zaczytaniu pliku zaczytuje je
+    			{ 
+        			for(int i=0; i<=n-1; i++){
+					
+       				dp>>tab1[i];
+       			}
+    			}   
+    			dp.close();//zamkniecie pliku z ciagiem do posortowania
+    			cout<<"Elementy przed sortowaniem:"<<endl;//wypisanie elemetów nieposortowaniej talicy
+    			for(int i=0; i<n; i++)
+    			{
+            		cout<<tab1[i]<<" ";
+	    		}
+				for(int i=0;i<n;i++)
+				{
+					tab2[i]=tab1[i];
+				}
+				
+					    	
+   				 start1 = clock();//czas liczenia    	
+   				 spw(n, tab1);//wywołanie sortowania przez wstawianie
+   				 stop1 = clock();
+    			 czas1 = (double)(stop1 - start1)/CLOCKS_PER_SEC;
+   				 start2 = clock();//czas liczenia
+				 grz(n,tab2);//wywołanie sortowania grzebieniowego
+   				 stop2 = clock();
+    			 czas2 = (double)(stop2 - start2)/CLOCKS_PER_SEC;
+   				 
+				ofstream wynik("wynik.txt");//otorzenie plku z wynikami
+				wynik<<"elementy po sortowaniu:"<<endl;
+				wynik.close();
+    			cout<<"\nElementy po sortowaniu:"<<endl;
+    			for(int i=0; i<n; i++)//zapis/wypisanie elementów posortowanego ciągu
+    			{
+				
+    				wynik.open("wynik.txt",ios_base::app);
+					wynik<<tab1[i]<<" ";
+					wynik.close();
+            		cout<<tab1[i]<<" ";
+            	}
+            	cout<<"czas wykonywania sorotowania przez wstawianie wynosi: "<<czas1<<endl;//wypisanie czasów każdego z sortowania
+            	cout<<"czas wykonywania sorotowania grzebieniowego wynosi: "<<czas1<<endl;
+   	 			cin.ignore();
+    			cin.get();
+    			break;
+			}
+	}
+    
+}
